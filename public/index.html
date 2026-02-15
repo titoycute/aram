@@ -6,11 +6,19 @@
     <title>ARAM | Biliran HIV Awareness Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ADD THIS: Markdown Parser Library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
         .hero-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        
+        /* ADD THIS: Style for Markdown output inside bubbles */
+        .markdown-content strong, .markdown-content b { font-weight: 800; color: inherit; }
+        .markdown-content p { margin-bottom: 0.5rem; }
+        .markdown-content p:last-child { margin-bottom: 0; }
+        .markdown-content ul { list-style-type: disc; margin-left: 1rem; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -123,7 +131,7 @@
             } else { box.classList.add('hidden'); }
         };
 
-        // 3. CHAT LOGIC (Using your Secure Backend)
+        // 3. CHAT LOGIC
         const chatDisplay = document.getElementById('chatDisplay');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -138,7 +146,6 @@
             loading.classList.remove('hidden');
 
             try {
-                // This points to your chat.js file
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -153,10 +160,20 @@
             }
         }
 
+        // UPDATED: Function to handle Markdown rendering
         function appendMsg(text, isUser) {
             const msg = document.createElement('div');
-            msg.className = isUser ? "bg-slate-800 text-white p-3 rounded-2xl ml-auto max-w-[85%]" : "bg-white p-3 rounded-2xl border border-slate-100 max-w-[85%] shadow-sm";
-            msg.innerText = text;
+            msg.className = isUser 
+                ? "bg-slate-800 text-white p-3 rounded-2xl ml-auto max-w-[85%]" 
+                : "bg-white p-3 rounded-2xl border border-slate-100 max-w-[85%] shadow-sm markdown-content";
+            
+            if (isUser) {
+                msg.innerText = text;
+            } else {
+                // Use marked.parse to convert **bold** into <strong>bold</strong>
+                msg.innerHTML = marked.parse(text);
+            }
+            
             chatDisplay.appendChild(msg);
             chatDisplay.scrollTop = chatDisplay.scrollHeight;
         }
