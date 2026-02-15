@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARAM | Biliran HIV Awareness Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .hero-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-black text-rose-600 italic">ARAM <span class="text-slate-400 not-italic text-xs font-bold uppercase tracking-widest">Biliran</span></h1>
+            <div class="space-x-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                <a href="#stats" class="hover:text-rose-600">Statistics</a>
+                <a href="#place" class="hover:text-rose-600">Place Status</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="pt-32 pb-16 px-6 hero-bg text-white text-center">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-4 italic tracking-tighter">Knowledge is Protection.</h2>
+        <p class="text-slate-400 max-w-xl mx-auto text-sm md:text-base">Official HIV Awareness Portal for Biliran Province. Real-time HARP statistics and AI-assisted information.</p>
+    </header>
+
+    <!-- Stats -->
+    <section id="stats" class="py-12 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily New Cases (PH)</p>
+                <h3 class="text-4xl font-black text-rose-600">57</h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Highest Risk Age</p>
+                <h3 class="text-4xl font-black text-slate-800">15-24</h3>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border shadow-sm">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Regional Status</p>
+                <h3 class="text-4xl font-black text-slate-800">Region 8</h3>
+            </div>
+        </div>
+        <div class="bg-white p-8 rounded-3xl border shadow-sm">
+            <canvas id="harpChart" height="100"></canvas>
+        </div>
+    </section>
+
+    <!-- Know Your Place -->
+    <section id="place" class="py-16 bg-slate-900 text-white px-6">
+        <div class="max-w-3xl mx-auto text-center">
+            <h3 class="text-2xl font-bold mb-8">Know Your Town Status</h3>
+            <select id="townSelect" class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-rose-500 font-bold mb-6">
+                <option value="">Select Municipality in Biliran...</option>
+                <option value="Almeria">Almeria</option>
+                <option value="Biliran">Biliran (Town)</option>
+                <option value="Cabucgayan">Cabucgayan</option>
+                <option value="Caibiran">Caibiran</option>
+                <option value="Culaba">Culaba</option>
+                <option value="Kawayan">Kawayan</option>
+                <option value="Maripipi">Maripipi</option>
+                <option value="Naval">Naval (Capital)</option>
+            </select>
+            <div id="statusBox" class="hidden p-6 bg-rose-600 rounded-2xl text-left animate-pulse">
+                <h4 id="townTitle" class="font-black text-xl mb-1">Town Name</h4>
+                <p id="townInfo" class="text-sm opacity-90 leading-relaxed"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot Floating -->
+    <div class="fixed bottom-6 right-6 z-[100]">
+        <div id="chatWindow" class="hidden w-80 md:w-96 bg-white shadow-2xl rounded-3xl border border-slate-200 overflow-hidden flex flex-col h-[500px] mb-4">
+            <div class="p-4 bg-rose-600 text-white font-bold flex justify-between items-center">
+                <span>Aram AI Assistant</span>
+                <button onclick="document.getElementById('chatWindow').classList.add('hidden')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chatDisplay" class="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-slate-50">
+                <div class="bg-white p-3 rounded-2xl border border-slate-100">Welcome to Aram. How can I help you today?</div>
+            </div>
+            <div id="loading" class="hidden px-4 py-1 text-[10px] text-rose-500 font-bold animate-pulse">ARAM IS THINKING...</div>
+            <div class="p-4 bg-white border-t flex gap-2">
+                <input type="text" id="chatInput" placeholder="Ask about HIV awareness..." class="flex-1 bg-slate-100 p-2 rounded-xl outline-none text-sm">
+                <button id="sendBtn" class="bg-rose-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button onclick="document.getElementById('chatWindow').classList.toggle('hidden')" class="w-16 h-16 bg-rose-600 text-white rounded-2xl shadow-2xl flex items-center justify-center transition hover:scale-110">
+            <i class="fas fa-comment-dots text-2xl"></i>
+        </button>
+    </div>
+
+    <script>
+        // 1. CHART LOGIC
+        new Chart(document.getElementById('harpChart'), {
+            type: 'line',
+            data: {
+                labels: ['2014', '2017', '2020', '2022', '2024'],
+                datasets: [{ label: 'Cases', data: [13, 27, 35, 42, 57], borderColor: '#e11d48', tension: 0.4, fill: true, backgroundColor: 'rgba(225, 29, 72, 0.05)' }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        });
+
+        // 2. TOWN LOGIC
+        const towns = {
+            "Almeria": "Status: Monitored. Local RHU offers free confidential screening.",
+            "Biliran": "Status: Moderate Vigilance. Transit hub monitoring active.",
+            "Naval": "STATUS: HUB CENTER. Biliran Provincial Hospital is located here for full support.",
+            "Maripipi": "Status: Low Incidence. Island-wide education drive active."
+        };
+        document.getElementById('townSelect').onchange = function() {
+            const box = document.getElementById('statusBox');
+            if(this.value) {
+                box.classList.remove('hidden');
+                document.getElementById('townTitle').innerText = this.value;
+                document.getElementById('townInfo').innerText = towns[this.value] || "Confidential screening available at your local Rural Health Unit (RHU).";
+            } else { box.classList.add('hidden'); }
+        };
+
+        // 3. CHAT LOGIC (Using your Secure Backend)
+        const chatDisplay = document.getElementById('chatDisplay');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loading = document.getElementById('loading');
+
+        async function askAram() {
+            const val = chatInput.value.trim();
+            if(!val) return;
+
+            appendMsg(val, true);
+            chatInput.value = '';
+            loading.classList.remove('hidden');
+
+            try {
+                // This points to your chat.js file
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: val })
+                });
+                const data = await res.json();
+                appendMsg(data.reply, false);
+            } catch (e) {
+                appendMsg("Error: Could not connect to Aram AI.", false);
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function appendMsg(text, isUser) {
+            const msg = document.createElement('div');
+            msg.className = isUser ? "bg-slate-800 text-white p-3 rounded-2xl ml-auto max-w-[85%]" : "bg-white p-3 rounded-2xl border border-slate-100 max-w-[85%] shadow-sm";
+            msg.innerText = text;
+            chatDisplay.appendChild(msg);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        sendBtn.onclick = askAram;
+        chatInput.onkeypress = (e) => { if(e.key === 'Enter') askAram(); };
+    </script>
+</body>
+</html>
